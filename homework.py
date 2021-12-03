@@ -17,7 +17,7 @@ PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_TIME = 600
+RETRY_TIME = 10  # 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -50,7 +50,8 @@ def get_api_answer(current_timestamp):
         JSON к типам данных Python.
     """
     timestamp = current_timestamp or int(time.time())
-    params = {'from_date': timestamp}
+    # params = {'from_date': timestamp}
+    params = {'from_date': 0}
     headers={'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     response = requests.get(ENDPOINT,params=params, headers=headers)
     if response.status_code != HTTPStatus.OK:
@@ -67,8 +68,8 @@ def check_response(response):
         домашних работ (он может быть и пустым), доступный в ответе API
         по ключу 'homeworks'.
     """
-    if not response:
-        raise TypeError('пустой')
+    if not response['homeworks'][0]:
+        raise IndexError('пустой')
     if type(response) != dict:
         raise TypeError('ожидается словарь')
     if type(response['homeworks']) != list:
