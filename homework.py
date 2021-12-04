@@ -4,7 +4,6 @@ import time
 from http import HTTPStatus
 
 import requests
-from requests.models import Response
 import telegram
 from dotenv import load_dotenv
 
@@ -33,13 +32,13 @@ last_response = ''
 
 
 class API_request_error(Exception):
-    """ошибка запроса АРI"""
+    """ошибка запроса АРI."""
+
     pass
 
 
 def send_message(bot, message):
-    """
-        отправляет сообщение в Telegram чат, определяемый переменной
+    """ отправляет сообщение в Telegram чат, определяемый переменной
         окружения TELEGRAM_CHAT_ID. Принимает на вход два параметра:
         экземпляр класса Bot и строку с текстом сообщения.
     """
@@ -48,26 +47,24 @@ def send_message(bot, message):
         if message != last_response:
             bot.send_message(TELEGRAM_CHAT_ID, message)
             last_response = message
-            logging.info(f'сообщение отправлено')
+            logging.info('сообщение отправлено')
         else:
             logging.info('сообщение повторяется')
-        
     except Exception:
         logging.error(f'сбой отправки сообщения {Exception}')
 
 
 def get_api_answer(current_timestamp):
-    """
-        делает запрос к единственному эндпоинту API-сервиса. В качестве
+    """ делает запрос к единственному эндпоинту API-сервиса. В качестве
         параметра функция получает временную метку. В случае успешного
         запроса должна вернуть ответ API, преобразовав его из формата
         JSON к типам данных Python.
     """
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
-    headers={'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
+    headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     try:
-        response = requests.get(ENDPOINT,params=params, headers=headers)
+        response = requests.get(ENDPOINT, params=params, headers=headers)
         if response.status_code != HTTPStatus.OK:
             logging.error(f'эндпоинт недоступен: {ENDPOINT}')
             raise Exception(f'ошибка {response}')
@@ -77,8 +74,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """
-        проверяет ответ API на корректность. В качестве параметра функция
+    """ проверяет ответ API на корректность. В качестве параметра функция
         получает ответ API, приведенный к типам данных Python. Если ответ
         API соответствует ожиданиям, то функция должна вернуть список
         домашних работ (он может быть и пустым), доступный в ответе API
@@ -94,8 +90,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """
-        извлекает из информации о конкретной домашней работе статус этой
+    """ извлекает из информации о конкретной домашней работе статус этой
         работы. В качестве параметра функция получает только один элемент
         из списка домашних работ. В случае успеха, функция возвращает
         подготовленную для отправки в Telegram строку, содержащую один из
@@ -116,17 +111,17 @@ def parse_status(homework):
 
 
 def check_tokens():
-    """
-        проверяет доступность переменных окружения, которые необходимы для
+    """ проверяет доступность переменных окружения, которые необходимы для
         работы программы. Если отсутствует хотя бы одна переменная
         окружения — функция должна вернуть False, иначе — True.
     """
     tokens = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
     for token in tokens:
-        if token != None:
-            return True
-        logging.critical(f'отсутствует токен {token}')
-        return False
+        if token == None:
+            logging.critical(f'отсутствует токен {token}')
+            return False
+        return True
+        
 
 
 def main():
