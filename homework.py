@@ -23,7 +23,7 @@ PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_TIME = 6
+RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -34,29 +34,12 @@ HOMEWORK_VERDICTS = {
     'rejected': 'Работа проверена: у ревьюера есть замечания.'
 }
 
-last_response = ''
-
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.info('сообщение отправлено')
-    except Exception:
-        logger.error(f'сбой отправки сообщения {Exception}')
-
-
-def send_message2(bot, message):
-    """Отправляет сообщение в Telegram чат."""
-    try:
-        global last_response
-        if message != last_response:
-            bot.send_message(TELEGRAM_CHAT_ID, message)
-            last_response = message
-            logger.info('сообщение отправлено')
-            return last_response
-        else:
-            logger.info('сообщение повторяется')
     except Exception:
         logger.error(f'сбой отправки сообщения {Exception}')
 
