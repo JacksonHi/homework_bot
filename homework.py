@@ -61,6 +61,8 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяет ответ API на корректность."""
+    if 'homeworks' not in response:
+        raise TypeError('homeworks отсутствует')
     if len(response['homeworks']) == 0:
         raise IndexError('homeworks пуст')
     if not isinstance(response, dict):
@@ -98,20 +100,17 @@ def check_tokens():
 
 def message_replay_check(message, last_response):
     """Не пропускает повторяющиеся сообщения."""
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     if message != last_response:
         last_response = message
         logger.info('сообщение не повторяется')
-        send_message(bot, message)
+        return last_response
     else:
         logger.info('сообщение повторяется')
-    return last_response
-    # не нравится что каждый раз перезаписывается переменная, но работает.
-    # если читаешь, значит еще не исправил :)
 
 
 def main():
     """Основная логика работы бота."""
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     last_response = ''
 
@@ -120,13 +119,19 @@ def main():
             response = get_api_answer(current_timestamp)
             if check_response(response):
                 message = parse_status(response['homeworks'][0])
-                last_response = message_replay_check(message, last_response)
+                mrc = message_replay_check(message, last_response)
+                if mrc is not None:
+                    last_response = mrc
+                    send_message(bot, message)
             time.sleep(RETRY_TIME)
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
-            last_response = message_replay_check(message, last_response)
+            mrc = message_replay_check(message, last_response)
+            if mrc is not None:
+                last_response = mrc
+                send_message(bot, message)
             time.sleep(RETRY_TIME)
 
 
